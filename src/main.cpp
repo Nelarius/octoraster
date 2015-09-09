@@ -7,6 +7,7 @@
 #include <ctime>
 #include <cstdlib>
 #include "rasterizer.h"
+#include "int.h"
 
 int main(int, char**)
 {
@@ -54,7 +55,7 @@ int main(int, char**)
              * */
             unsigned char* pixels = (unsigned char*) windowSurface->pixels;
             for ( int i = 0; i < windowSurface->h; i++ ) {
-                unsigned int* p = (unsigned int*) pixels;
+                uint32_t* p = ( uint32_t* ) pixels;
                 for ( int j = 0; j < windowSurface->w; j++ ) {
                     *p++ = SDL_MapRGB( windowSurface->format, 0, 0, 0 );
                 }
