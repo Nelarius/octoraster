@@ -28,12 +28,6 @@
 *.app
 umbra_assignment
 
-# CMake stuff
-CMakeFiles
-CMakeCache.txt
-Makefile
-*.cmake
-
 # Visual Studio stuff
 *.vcxproj*
 Debug
