@@ -35,6 +35,9 @@ int main(int, char**)
 
     srand( time(0) );
     const float RandMax = RAND_MAX;
+    Vector3f v1 = Vector3f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax, rand() / RandMax );
+    Vector3f v2 = Vector3f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax, rand() / RandMax );
+    Vector3f v3 = Vector3f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax, rand() / RandMax );
 
     // Main loop
     bool quit = false;
@@ -62,9 +65,13 @@ int main(int, char**)
                 pixels += windowSurface->pitch;
             }
             /*
-             * rasterize random triangles here
+             * rasterize random triangle here
              * */
-            rasterizer.scanTriangle( Vector2f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax ), Vector2f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax ), Vector2f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax ) );
+            rasterizer.scanTriangle( 
+                v1,
+                v2,
+                v3
+            );
             
             SDL_UnlockSurface(windowSurface);
         }

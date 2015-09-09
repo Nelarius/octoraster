@@ -20,7 +20,7 @@ class Rasterizer {
         Rasterizer( SDL_Surface* surface );
         ~Rasterizer();
         
-        void scanTriangle( const Vector2f& p1, const Vector2f& p2, const Vector2f& p3 );
+        void scanTriangle( const Vector3f& p1, const Vector3f& p2, const Vector3f& p3 );
         
     private:
         Rasterizer();
