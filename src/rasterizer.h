@@ -24,6 +24,7 @@ class Rasterizer {
         
     private:
         Rasterizer();
+        
         inline int index_( int i, int j ) const {
             int r = i*surface_->w + j;
             ASSERT( r < surface_->w*surface_->h, "Index out of bounds" );

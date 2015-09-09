@@ -24,7 +24,6 @@ struct Vector2 {
         T data[2];
         struct { T x, y; };
         struct { T r, g; };
-        struct { T min, max; };
     };
 };
 
