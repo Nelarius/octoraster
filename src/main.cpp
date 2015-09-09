@@ -4,6 +4,9 @@
 #   include <SDL2/SDL.h>
 #endif
 #include <stdio.h>
+#include <ctime>
+#include <cstdlib>
+#include "rasterizer.h"
 
 int main(int, char**)
 {
@@ -17,9 +20,10 @@ int main(int, char**)
             "Umbra Assignment",
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
-            800, 600,
+            600, 400,
             0);
-
+    
+    Rasterizer rasterizer( SDL_GetWindowSurface( window ) );
     SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
     if (windowSurface->format->BytesPerPixel < 4)
     {
@@ -27,6 +31,9 @@ int main(int, char**)
         SDL_DestroyWindow(window);
         return 2;
     }
+
+    srand( time(0) );
+    const float RandMax = RAND_MAX;
 
     // Main loop
     bool quit = false;
@@ -39,21 +46,25 @@ int main(int, char**)
                 quit = true;
             }
         }
-        static int c = 0;
+        
         if (!SDL_LockSurface(windowSurface))
-        {
-            unsigned char* pixels = (unsigned char*)windowSurface->pixels;
-            for (int y = 0; y < windowSurface->h; y++)
-            {
-                unsigned int* p = (unsigned int*)pixels;
-                for (int x = 0; x < windowSurface->w; x++)
-                {
-                   *p++ = SDL_MapRGB(windowSurface->format, (unsigned char)((y>>2)&0xff), (unsigned char)((x>>2)&0xff), (unsigned char)(255-c));
+        {   
+            /*
+             * clear the screen here
+             * */
+            unsigned char* pixels = (unsigned char*) windowSurface->pixels;
+            for ( int i = 0; i < windowSurface->h; i++ ) {
+                unsigned int* p = (unsigned int*) pixels;
+                for ( int j = 0; j < windowSurface->w; j++ ) {
+                    *p++ = SDL_MapRGB( windowSurface->format, 0, 0, 0 );
                 }
-                pixels += windowSurface->pitch; // move pointer to the next row
+                pixels += windowSurface->pitch;
             }
-            c = (c + 1) & 0xff;
-
+            /*
+             * rasterize random triangles here
+             * */
+            rasterizer.scanTriangle( Vector2f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax ), Vector2f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax ), Vector2f( 600.0f*rand()/RandMax, 400.0f*rand()/RandMax ) );
+            
             SDL_UnlockSurface(windowSurface);
         }
         SDL_UpdateWindowSurface(window);
