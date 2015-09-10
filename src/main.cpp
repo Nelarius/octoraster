@@ -37,12 +37,12 @@ int main(int, char**)
     }
     
     /*
-     * Create rasterizer
+     * create rasterizer
      * */
      Rasterizer rasterizer( SDL_GetWindowSurface( window ) );
     
     /*
-     * craete triangle instance
+     * create triangle instance
      * */
     std::vector< Vector4f > triangle;
     triangle.push_back( Vector4f( -5.0f, -2.5f, 0.0f, 1.0f ) );
@@ -52,6 +52,7 @@ int main(int, char**)
     /*
      * set model orientation
      * */
+    float angularVelocity = 0.3f;
     Quatf orientation = Quatf::Identity();
     Quatf delta( sin(0.004f), 0.0f, 0.0f, cos(0.004f) );
     Matrix4f model1( 
@@ -72,6 +73,9 @@ int main(int, char**)
     camera.width = 20.0f;
     camera.height = 15.0f;
     
+    uint32_t lastTime, currentTime;
+    lastTime = SDL_GetTicks();
+    
     // Main loop
     bool quit = false;
     while (!quit) 
@@ -83,6 +87,11 @@ int main(int, char**)
                 quit = true;
             }
         }
+        
+        currentTime = SDL_GetTicks();
+        float dt = 0.001f * ( currentTime - lastTime );
+        lastTime = currentTime;
+        
         
         if (!SDL_LockSurface(windowSurface))
         {   
@@ -100,7 +109,7 @@ int main(int, char**)
             /*
              * render the triangles
              * */
-            orientation = orientation * delta;
+            orientation = orientation * Quatf( sin( dt*angularVelocity ), 0.0f, 0.0f, cos( dt*angularVelocity ) );
             // this one is deeper
             Render( rasterizer, triangle, model2 * Quatf( 0.0f, 0.0f, sin(0.3f), cos(0.3f) ).asMatrix(), camera );
             Render( rasterizer, triangle, model1 * orientation.asMatrix(), camera );  // this is deeper
