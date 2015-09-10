@@ -6,7 +6,7 @@
 
 template<typename T> 
 class Quaternion {
-    
+        
     public:
         Quaternion()
         :   v( 0.0, 0.0, 0.0 ),
@@ -22,6 +22,10 @@ class Quaternion {
         :   v( x, y, z ),
             w( w )
             {}
+            
+        static Quaternion<T> Identity() {
+            return Quaternion<T>( 0.0, 0.0, 0.0, 1.0 );
+        }
         
         Quaternion<T> conjugate() const {
             return Quaternion<T>( -v.x, -v.y, -v.z, w );

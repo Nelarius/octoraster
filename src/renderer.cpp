@@ -11,7 +11,6 @@ Matrix4f OrthoProjection( const OrthoCamera& c ) {
 }
 
 void Render( Rasterizer& r, const std::vector< Vector4f >& buffer, const Matrix4f& model, const OrthoCamera& c ) {
-    r.clear();  // clear the z buffer
     for ( std::size_t i = 0u; i < buffer.size(); i += 3 ) {
         Vector4f v1 = model * buffer[i];
         v1 = OrthoProjection( c ) * v1;

@@ -1,9 +1,9 @@
 #include "rasterizer.h"
+#include "int.h"
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>    // for min, max
 #include <iostream>
-#include "int.h"
 
 struct EdgeEqn {
     public:
@@ -60,19 +60,26 @@ struct InterpolateVal {
 Rasterizer::Rasterizer( SDL_Surface* surface )
 :   surface_( surface ),
     Width_( surface->w ),
-    Height_( surface->h )
+    Height_( surface->h ),
+    zBuffer_( Width_*Height_, 100000.0f )
     {}
 
 Rasterizer::~Rasterizer() {}
 
-void Rasterizer::scanTriangle( const Vector3f& p0, const Vector3f& p1, const Vector3f& p2 ) {
+void Rasterizer::rasterize( const Vector4f& v0, const Vector4f& v1, const Vector4f& v2 ) {
+    /*
+     * Convert from normalized device coordinates to screen space coordinates
+     * */
+    Vector3f p0( 0.5f*(v0.x + 1.0f)*Width_, -0.5f*(v0.y - 1.0f)*Height_, v0.z );
+    Vector3f p1( 0.5f*(v1.x + 1.0f)*Width_, -0.5f*(v0.y - 1.0f)*Height_, v1.z );
+    Vector3f p2( 0.5f*(v2.x + 1.0f)*Width_, -0.5f*(v2.y - 1.0f)*Height_, v2.z );
+    
+    /*
+     * Calculate edge equations
+     * */
     EdgeEqn e0( p0, p1 );
     EdgeEqn e1( p1, p2 );
     EdgeEqn e2( p2, p0 );
-    
-    float depth0 = p0.z*255.0f;
-    float depth1 = p1.z*255.0f;
-    float depth2 = p2.z*255.0f;
     
     /*
      * a positive area implies that the positive half-planes defined by the edge equations
@@ -94,7 +101,7 @@ void Rasterizer::scanTriangle( const Vector3f& p0, const Vector3f& p1, const Vec
      * get the equations for interpolating a floating point value across 
      * the triangle face
      * */
-    InterpolateVal color( e0, depth0, e1, depth1, e2, depth2 );
+    InterpolateVal depth( e0, v0.z, e1, v1.z, e2, v2.z );
     
     /*
      * compute triangle bounding box
@@ -116,7 +123,7 @@ void Rasterizer::scanTriangle( const Vector3f& p0, const Vector3f& p1, const Vec
     /*
      * scan the triangle within the bounding box
      * */
-    unsigned int bytesPerPixel = surface_->pitch / surface_->w;
+    const unsigned int bytesPerPixel = surface_->pitch / surface_->w;
     unsigned char* pixels = ( unsigned char* ) surface_->pixels;
     pixels += minY  * surface_->pitch;
     
@@ -125,12 +132,26 @@ void Rasterizer::scanTriangle( const Vector3f& p0, const Vector3f& p1, const Vec
         uint32_t* p = ( uint32_t* ) pixels;
         
         for ( int j = minX; j <= maxX; j++ ) {
-            if ( e0.eval(j, i) > 0 && e1.eval(j, i) > 0 && e2.eval(j, i) > 0 ) {
-                unsigned char c = color.eval( j, i );
-                *p = SDL_MapRGB(surface_->format, c, c, c );
+            
+            float z = depth.eval(j, i);
+            if ( zBuffer_[index_(i,j)] < z ) {
+                p++;
+                continue;
+            }
+            
+            if ( e0.eval(j, i) >= 0 && e1.eval(j, i) >= 0 && e2.eval(j, i) >= 0 ) {
+                zBuffer_[index_(i, j)] = z;
+                unsigned char c = 255.0f - 255.0f*(0.5f*(z + 1.0f));
+                *p = SDL_MapRGB( surface_->format, c, c, c );
             }
             p++;
         }
         pixels += bytesPerPixel * ( Width_ - minX );
+    }
+}
+
+void Rasterizer::clear() {
+    for ( std::size_t i = 0u; i < zBuffer_.size(); i++ ) {
+        zBuffer_[i] = 100000.0f;
     }
 }
