@@ -28,6 +28,7 @@ endif
 
 OBJ = src/main.o \
 	src/rasterizer.o \
+	src/renderer.o \
 
 all: $(EXECUTABLE)
 
