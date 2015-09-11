@@ -12,8 +12,9 @@ struct EdgeEqn {
             B( p1.x - p0.x ),
             C( p0.x*p1.y - p1.x*p0.y ),
             baseX( p0.x ),
-            baseY( p0.y )  {}
-            
+            baseY( p0.y )
+            {}
+        
         inline int eval( int x, int y ) const {
             return A*( x - baseX ) + B*( y - baseY );
         }
@@ -37,24 +38,31 @@ struct EdgeEqn {
 
 struct InterpolateVal {
     public:
-        InterpolateVal( const EdgeEqn& e0, float v0, const EdgeEqn& e1, float v1, const EdgeEqn& e2, float v2 ) {
-            float area = 0.5f * ( e0.C + e1.C + e2.C );
-            A = 0.5f * ( v0*e0.A + v1*e1.A + v2*e2.A ) / area;
-            B = 0.5f * ( v0*e0.B + v1*e1.B + v2*e2.B ) / area;
-            C = 0.5f * ( v0*e0.C + v1*e1.C + v2*e2.C ) / area;
+        InterpolateVal( 
+            const Vector3f& p0, float v0, 
+            const Vector3f& p1, float v1, 
+            const Vector3f& p2, float v2 
+        ):  p0_( p0 ),
+            p1_( p1 ),
+            p2_( p2 ),
+            v0_( v0 ),
+            v1_( v1 ),
+            v2_( v2 ),
+            InverseArea_( 2.0f / ( (p1 - p0).cross(p2 - p0).norm() ) )
+            {}
+            
+        inline float eval( float x, float y ) {
+            const float A0 = 0.5f*fabs( (p1_.x - x)*(p2_.y - y) - (p2_.x - x)*(p1_.y - y) );
+            const float A1 = 0.5f*fabs( (p2_.x - x)*(p0_.y - y) - (p0_.x - x)*(p2_.y - y) );
+            const float A2 = 0.5f*fabs( (p0_.x - x)*(p1_.y - y) - (p1_.x - x)*(p0_.y - y) );
+            
+            return InverseArea_*( A0*v0_ + A1*v1_ + A2*v2_ );
         }
         
-        float eval( int x, int y ) const {
-            return A*x + B*y + C;
-        }
-        
-        float A;
-        float B;
-        float C;
-    
     private:
-        InterpolateVal() {}
-        
+        const Vector3f p0_, p1_, p2_;
+        const float v0_, v1_, v2_;
+        const float InverseArea_;
 };
 
 Rasterizer::Rasterizer( SDL_Surface* surface )
@@ -101,7 +109,7 @@ void Rasterizer::rasterize( const Vector4f& v0, const Vector4f& v1, const Vector
      * get the equations for interpolating a floating point value across 
      * the triangle face
      * */
-    InterpolateVal depth( e0, v0.z, e1, v1.z, e2, v2.z );
+    InterpolateVal depth( p0, v0.z, p1, v1.z, p2, v2.z );
     
     /*
      * compute triangle bounding box
@@ -133,7 +141,7 @@ void Rasterizer::rasterize( const Vector4f& v0, const Vector4f& v1, const Vector
         
         for ( int j = minX; j <= maxX; j++ ) {
             
-            float z = depth.eval(j, i);
+            const float z = depth.eval( (float)j, (float)i );
             if ( zBuffer_[index_(i,j)] < z ) {
                 p++;
                 continue;
