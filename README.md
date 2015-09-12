@@ -4,7 +4,9 @@ A small triangle rasterizer with a depth buffer.
 
 ## Build
 
-Written in C++98. The code has been tested using gcc on Linux and Windows.
+Build using CMake.
+
+The code has been tested using gcc on Linux and Windows. The code is written in C++98.
 
 ## A small overview
 

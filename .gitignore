@@ -40,4 +40,6 @@ Win32
 
 # Codelite project files
 *.project
-*.txt
+
+build/
+
