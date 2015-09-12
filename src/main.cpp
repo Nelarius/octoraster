@@ -30,7 +30,7 @@ int main(int, char**)
             0);
     
     SDL_Surface* windowSurface = SDL_GetWindowSurface(window);
-    ASSERT( windowSurface->w % 10 == 0, "Window width not suitable, loop unrolling will break" );
+    ASSERT( windowSurface->w % 4 == 0, "Window width not suitable, loop unrolling will break" );
     if (windowSurface->format->BytesPerPixel < 4)
     {
         printf("Invalid pixel format.\n");
