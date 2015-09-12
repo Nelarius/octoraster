@@ -12,12 +12,9 @@ Matrix4f OrthoProjection( const OrthoCamera& c ) {
 
 void Render( Rasterizer& r, const std::vector< Vector4f >& buffer, const Matrix4f& model, const OrthoCamera& c ) {
     for ( std::size_t i = 0u; i < buffer.size(); i += 3 ) {
-        Vector4f v1 = model * buffer[i];
-        v1 = OrthoProjection( c ) * v1;
-        Vector4f v2 = model * buffer[i+1];
-        v2 = OrthoProjection( c ) * v2;
-        Vector4f v3 = model * buffer[i+2];
-        v3 = OrthoProjection( c ) * v3;
+        Vector4f v1 = OrthoProjection( c ) * model * buffer[i];
+        Vector4f v2 = OrthoProjection( c ) * model * buffer[i+1];
+        Vector4f v3 = OrthoProjection( c ) * model * buffer[i+2];
         r.rasterize( v1, v2, v3 );
     }
 }
